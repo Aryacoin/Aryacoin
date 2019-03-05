@@ -1,0 +1,24 @@
+obj/main.o: main.cpp alert.h uint256.h util.h netbase.h serialize.h \
+ allocators.h version.h clientversion.h compat.h checkpoints.h db.h \
+ main.h bignum.h sync.h threadsafety.h net.h mruset.h limitedmap.h \
+ protocol.h addrman.h hash.h bloom.h script.h keystore.h crypter.h key.h \
+ scrypt.h txdb.h leveldb.h \
+ /root/testingrepo/Arya/src/leveldb/include/leveldb/db.h \
+ /root/testingrepo/Arya/src/leveldb/include/leveldb/iterator.h \
+ /root/testingrepo/Arya/src/leveldb/include/leveldb/slice.h \
+ /root/testingrepo/Arya/src/leveldb/include/leveldb/status.h \
+ /root/testingrepo/Arya/src/leveldb/include/leveldb/options.h \
+ /root/testingrepo/Arya/src/leveldb/include/leveldb/write_batch.h init.h \
+ wallet.h ui_interface.h walletdb.h base58.h checkqueue.h
+main.cpp alert.h uint256.h util.h netbase.h serialize.h :
+ allocators.h version.h clientversion.h compat.h checkpoints.h db.h :
+ main.h bignum.h sync.h threadsafety.h net.h mruset.h limitedmap.h :
+ protocol.h addrman.h hash.h bloom.h script.h keystore.h crypter.h key.h :
+ scrypt.h txdb.h leveldb.h :
+ /root/testingrepo/Arya/src/leveldb/include/leveldb/db.h :
+ /root/testingrepo/Arya/src/leveldb/include/leveldb/iterator.h :
+ /root/testingrepo/Arya/src/leveldb/include/leveldb/slice.h :
+ /root/testingrepo/Arya/src/leveldb/include/leveldb/status.h :
+ /root/testingrepo/Arya/src/leveldb/include/leveldb/options.h :
+ /root/testingrepo/Arya/src/leveldb/include/leveldb/write_batch.h init.h :
+ wallet.h ui_interface.h walletdb.h base58.h checkqueue.h :
