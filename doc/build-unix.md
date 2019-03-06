@@ -48,7 +48,7 @@ Licenses of statically linked libraries:
 -  GCC           4.3.3
 -  OpenSSL       1.0.1c
 -  Berkeley DB   4.8.30.NC
--  Boost         1.37
+-  Boost         1.37 (Recommended , using other Versions can cause the build to fail)
 -  miniupnpc     1.6
 
 Dependency Build Instructions: Ubuntu & Debian
@@ -104,7 +104,14 @@ You need Berkeley DB 4.8.  If you have to build Berkeley DB yourself:
 
 Boost
 -----
-If you need to build Boost yourself:
+Use Boost1.37 for better results (uninstall newer version of Boost first)
+Building Boost1.37 - 
+	sudo su
+	./configure --with-libraries=date_time,filesystem,iostreams,program_options,regex,signals,system,test,thread
+	make
+	sudo make install
+
+For newer versions of Boost - 
 
 	sudo su
 	./bootstrap.sh
