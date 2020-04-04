@@ -1,7 +1,7 @@
 Aryacoin Core integration/staging tree
 =====================================
 
-[![Build Status](https://travis-ci.org/aryacoin-project/aryacoin.svg?branch=master)](https://travis-ci.org/aryacoin-project/aryacoin)
+[![Build Status](https://travis-ci.org/Aryacoin/Aryacoin.svg?branch=master)](https://travis-ci.org/Aryacoin/Aryacoin)
 
 https://aryacoin.io
 
