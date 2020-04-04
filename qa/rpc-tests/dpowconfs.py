@@ -1,0 +1,53 @@
+#!/usr/bin/env python3
+# Copyright (c) 2018 The Hush developers
+# Copyright (c) 2019 The SuperNET developers
+# Distributed under the MIT software license, see the accompanying
+# file COPYING or http://www.opensource.org/licenses/mit-license.php.
+
+from test_framework.test_framework import BitcoinTestFramework
+from test_framework.util import assert_equal, initialize_chain_clean, \
+    start_node, stop_node, wait_bitcoinds
+
+
+class DPoWConfsTest(BitcoinTestFramework):
+
+    def setup_chain(self):
+        print("Initializing test directory "+self.options.tmpdir)
+        num_nodes = 1
+        initialize_chain_clean(self.options.tmpdir, num_nodes)
+
+    def setup_network(self):
+        self.nodes = []
+        self.is_network_split = False
+        self.nodes.append(start_node(0, self.options.tmpdir))
+        self.sync_all()
+
+    def run_test(self):
+        rpc = self.nodes[0]
+        # 21 is notarized, next will be 28. Must mine at least 22
+        # blocks for 20 block maturity rule
+        blockhashes = rpc.generate(22)
+        # block 21, this is 0 indexed
+        notarizedhash = blockhashes[20]
+        print (rpc.getinfo())
+
+        taddr = rpc.getnewaddress()
+        rpc.sendtoaddress(taddr, 100)
+        rpc.generate(2)
+
+        info = rpc.getinfo()
+        assert_equal( info['notarizedhash'], notarizedhash)
+        
+        result = rpc.listunspent()
+
+        # this xtn has 2 raw confs, but not in a notarized block,
+        # so dpowconfs holds it at 1
+        for res in result:
+            #print res
+            if (res['address'] == taddr):
+                assert_equal( res['confirmations'], 1 )
+                assert_equal( res['rawconfirmations'], 2 )
+
+
+if __name__ == '__main__':
+    DPoWConfsTest().main()
