@@ -13,23 +13,26 @@
  *                                                                            *
  ******************************************************************************/
 
+
 #ifndef komodo_rpcblockchain_h
 #define komodo_rpcblockchain_h
 
-#include "main.h"
+#include <rpc/server.h>
+#include <univalue.h>
+#include <validation.h>
+// class JSONRPCRequest;
+// class UniValue;
 
 int32_t komodo_MoMdata(int32_t *notarized_htp,uint256 *MoMp,uint256 *kmdtxidp,int32_t height,uint256 *MoMoMp,int32_t *MoMoMoffsetp,int32_t *MoMoMdepthp,int32_t *kmdstartip,int32_t *kmdendip);
 uint256 komodo_calcMoM(int32_t height,int32_t MoMdepth);
 extern char ASSETCHAINS_SYMBOL[65];
-uint32_t DPOWCONFS = 1;
 extern int32_t NOTARIZED_HEIGHT;
+
 
 int32_t komodo_dpowconfs(int32_t txheight,int32_t numconfs)
 {
     // DPoW confs are on by default
-    int32_t dpowconfs = 1;
-    DPOWCONFS = GetArg("-dpowconfs",dpowconfs);
-    if ( DPOWCONFS != 0 && txheight > 0 && numconfs > 0 )
+    if ( txheight > 0 && numconfs > 0 )
     {
         if ( NOTARIZED_HEIGHT > 0 )
         {
@@ -57,65 +60,62 @@ int32_t komodo_MoM(int32_t *notarized_heightp,uint256 *MoMp,uint256 *kmdtxidp,in
     return(depth);
 }
 
-UniValue calc_MoM(const UniValue& params, bool fHelp)
+UniValue calc_MoM(const JSONRPCRequest& request)
 {
     int32_t height,MoMdepth; uint256 MoM; UniValue ret(UniValue::VOBJ); UniValue a(UniValue::VARR);
-    if ( fHelp || params.size() != 2 )
+    if ( request.params.size() != 2 )
         throw std::runtime_error("calc_MoM height MoMdepth\n");
     LOCK(cs_main);
-    height = atoi(params[0].get_str().c_str());
-    MoMdepth = atoi(params[1].get_str().c_str());
-    if ( height <= 0 )
-        throw std::runtime_error("calc_MoM illegal height, must be positive\n");
-    if ( MoMdepth <= 0 || MoMdepth >= height )
-        throw std::runtime_error("calc_MoM illegal MoMdepth, must be positive and less than height\n");
-
+    height = atoi(request.params[0].get_str().c_str());
+    MoMdepth = atoi(request.params[1].get_str().c_str());
+    if ( height <= 0 || MoMdepth <= 0 || MoMdepth >= height )
+        throw std::runtime_error("calc_MoM illegal height or MoMdepth\n");
     //fprintf(stderr,"height_MoM height.%d\n",height);
     MoM = komodo_calcMoM(height,MoMdepth);
-    ret.push_back(Pair("coin",(char *)(ASSETCHAINS_SYMBOL[0] == 0 ? "KMD" : ASSETCHAINS_SYMBOL)));
-    ret.push_back(Pair("height",height));
-    ret.push_back(Pair("MoMdepth",MoMdepth));
-    ret.push_back(Pair("MoM",MoM.GetHex()));
+    ret.pushKV("coin",(char *)(ASSETCHAINS_SYMBOL[0] == 0 ? "KMD" : ASSETCHAINS_SYMBOL));
+    ret.pushKV("height",height);
+    ret.pushKV("MoMdepth",MoMdepth);
+    ret.pushKV("MoM",MoM.GetHex());
     return ret;
 }
 
-UniValue height_MoM(const UniValue& params, bool fHelp)
+UniValue height_MoM(const JSONRPCRequest& request)
 {
     int32_t height,depth,notarized_height,MoMoMdepth,MoMoMoffset,kmdstarti,kmdendi; uint256 MoM,MoMoM,kmdtxid; uint32_t timestamp = 0; UniValue ret(UniValue::VOBJ); UniValue a(UniValue::VARR);
-    if ( fHelp || params.size() != 1 )
+    if ( request.params.size() != 1 )
         throw std::runtime_error("height_MoM height\n");
     LOCK(cs_main);
-    height = atoi(params[0].get_str().c_str());
+    height = atoi(request.params[0].get_str().c_str());
     if ( height <= 0 )
     {
         if ( chainActive.Tip() == 0 )
         {
-            ret.push_back(Pair("error",(char *)"no active chain yet"));
+            ret.pushKV("error",(char *)"no active chain yet");
             return(ret);
         }
         height = chainActive.Tip()->nHeight;
     }
     //fprintf(stderr,"height_MoM height.%d\n",height);
     depth = komodo_MoM(&notarized_height,&MoM,&kmdtxid,height,&MoMoM,&MoMoMoffset,&MoMoMdepth,&kmdstarti,&kmdendi);
-    ret.push_back(Pair("coin",(char *)(ASSETCHAINS_SYMBOL[0] == 0 ? "KMD" : ASSETCHAINS_SYMBOL)));
-    ret.push_back(Pair("height",height));
-    ret.push_back(Pair("timestamp",(uint64_t)timestamp));
+    ret.pushKV("coin",(char *)(ASSETCHAINS_SYMBOL[0] == 0 ? "KMD" : ASSETCHAINS_SYMBOL));
+    ret.pushKV("height",height);
+    ret.pushKV("timestamp",(uint64_t)timestamp);
     if ( depth > 0 )
     {
-        ret.push_back(Pair("depth",depth));
-        ret.push_back(Pair("notarized_height",notarized_height));
-        ret.push_back(Pair("MoM",MoM.GetHex()));
-        ret.push_back(Pair("kmdtxid",kmdtxid.GetHex()));
+        ret.pushKV("depth",depth);
+        ret.pushKV("notarized_height",notarized_height);
+        ret.pushKV("MoM",MoM.GetHex());
+        ret.pushKV("kmdtxid",kmdtxid.GetHex());
         if ( ASSETCHAINS_SYMBOL[0] != 0 )
         {
-            ret.push_back(Pair("MoMoM",MoMoM.GetHex()));
-            ret.push_back(Pair("MoMoMoffset",MoMoMoffset));
-            ret.push_back(Pair("MoMoMdepth",MoMoMdepth));
-            ret.push_back(Pair("kmdstarti",kmdstarti));
-            ret.push_back(Pair("kmdendi",kmdendi));
+            ret.pushKV("MoMoM",MoMoM.GetHex());
+            ret.pushKV("MoMoMoffset",MoMoMoffset);
+            ret.pushKV("MoMoMdepth",MoMoMdepth);
+            ret.pushKV("kmdstarti",kmdstarti);
+            ret.pushKV("kmdendi",kmdendi);
         }
-    } else ret.push_back(Pair("error",(char *)"no MoM for height"));
-
+    } else ret.pushKV("error",(char *)"no MoM for height");
+    
     return ret;
 }
 
